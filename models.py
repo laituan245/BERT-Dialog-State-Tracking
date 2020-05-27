@@ -95,7 +95,7 @@ class Model(nn.Module):
     def run_train(self, dataset, ontology, args):
         model, tokenizer = self.bert, self.tokenizer
         batch_size = args.batch_size
-        model.train()
+        self.train()
 
         # Generate training examples
         turns = list(dataset['train'].iter_turns())
@@ -138,12 +138,12 @@ class Model(nn.Module):
                 _, _, input_ids, token_type_ids, labels = list(zip(*batch))
 
                 # Padding and Convert to Torch Tensors
-                input_ids, _ = pad(input_ids, args.device)
-                token_type_ids, _ = pad(token_type_ids, args.device)
+                input_ids, input_masks = pad(input_ids, args.device)
+                token_type_ids = pad(token_type_ids, args.device)[0]
                 labels = torch.LongTensor(labels).to(args.device)
 
                 # Calculate loss
-                loss = model(input_ids, token_type_ids, labels=labels)
+                loss = model(input_ids, token_type_ids, input_masks, labels=labels)
                 if args.n_gpus > 1:
                     loss = loss.mean()
                 if args.gradient_accumulation_steps > 1:
@@ -176,7 +176,7 @@ class Model(nn.Module):
         model, tokenizer = self.bert, self.tokenizer
         batch_size = args.batch_size
         was_training = model.training
-        model.eval()
+        self.eval()
 
         preds = []
         examples = turn_to_examples(turn, ontology, tokenizer)
@@ -185,11 +185,11 @@ class Model(nn.Module):
             slots, values, input_ids, token_type_ids, _ = list(zip(*batch))
 
             # Padding and Convert to Torch Tensors
-            input_ids, _ = pad(input_ids, args.device)
-            token_type_ids, _ = pad(token_type_ids, args.device)
+            input_ids, input_masks = pad(input_ids, args.device)
+            token_type_ids = pad(token_type_ids, args.device)[0]
 
             # Forward Pass
-            logits = model(input_ids, token_type_ids)
+            logits = model(input_ids, token_type_ids, input_masks)
             probs = torch.softmax(logits, dim=-1)[:, 1].cpu().data.numpy()
 
             # Update preds
@@ -198,7 +198,7 @@ class Model(nn.Module):
                     preds.append((slots[j], values[j]))
 
         if was_training:
-            model.train()
+            self.train()
 
         return preds
 

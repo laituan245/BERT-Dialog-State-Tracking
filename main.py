@@ -1,6 +1,12 @@
 import os
 import torch
+import random
+import numpy as np
 import argparse
+
+torch.manual_seed(0)
+random.seed(0)
+np.random.seed(0)
 
 from models import Model
 from pathlib import Path
@@ -18,7 +24,7 @@ def create_parser():
     parser.add_argument('--output_dir', type=Path, required=True)
 
     # Training Parameters
-    parser.add_argument('--epochs', type=int, default=50)
+    parser.add_argument('--epochs', type=int, default=25)
     parser.add_argument('--batch_size', type=int, default=16)
     parser.add_argument('--learning_rate', type=float, default=2e-5)
     parser.add_argument('--warmup_proportion', type=float, default=0.1)
