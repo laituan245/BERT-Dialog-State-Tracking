@@ -1,6 +1,12 @@
 import os
 import torch
+import random
+import numpy as np
 import argparse
+
+torch.manual_seed(0)
+random.seed(0)
+np.random.seed(0)
 
 from models import Model
 from pathlib import Path

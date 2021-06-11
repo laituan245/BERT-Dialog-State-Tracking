@@ -29,7 +29,8 @@ def pad(seqs, device, pad=0):
     lens = [len(s) for s in seqs]
     max_len = max(lens)
     padded = torch.LongTensor([s + (max_len-l) * [pad] for s, l in zip(seqs, lens)])
-    return padded.to(device), lens
+    masks = torch.LongTensor([l * [1] + (max_len-l) * [0] for l in lens])
+    return padded.to(device), masks.to(device)
 
 class RunningAverage():
     """A simple class that maintains the running average of a quantity
