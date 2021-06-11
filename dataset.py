@@ -78,7 +78,8 @@ class Dataset:
 
                 gold_recovered = set()
                 pred_recovered = set()
-                for s, v in pred_inform:
+                pred_inform_list = list(pred_inform); pred_inform_list.sort()
+                for s, v in pred_inform_list:
                     pred_state[s] = v
                 for b in t.belief_state:
                     for s, v in b['slots']:
